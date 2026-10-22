@@ -1,0 +1,549 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		B0B66F733089A3470089B9BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0B66F5B3089A3450089B9BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0B66F623089A3450089B9BB;
+			remoteInfo = JoClean;
+		};
+		B0B66F7D3089A3470089B9BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B0B66F5B3089A3450089B9BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0B66F623089A3450089B9BB;
+			remoteInfo = JoClean;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B0B66F633089A3450089B9BB /* JoClean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoClean.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0B66F723089A3470089B9BB /* JoCleanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoCleanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0B66F7C3089A3470089B9BB /* JoCleanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoCleanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B0B66F653089A3450089B9BB /* JoClean */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JoClean;
+			sourceTree = "<group>";
+		};
+		B0B66F753089A3470089B9BB /* JoCleanTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JoCleanTests;
+			sourceTree = "<group>";
+		};
+		B0B66F7F3089A3470089B9BB /* JoCleanUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JoCleanUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B0B66F603089A3450089B9BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		B0B66F6F3089A3470089B9BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		B0B66F793089A3470089B9BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B0B66F5A3089A3450089B9BB = {
+			isa = PBXGroup;
+			children = (
+				B0B66F653089A3450089B9BB /* JoClean */,
+				B0B66F753089A3470089B9BB /* JoCleanTests */,
+				B0B66F7F3089A3470089B9BB /* JoCleanUITests */,
+				B0B66F643089A3450089B9BB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B0B66F643089A3450089B9BB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B0B66F633089A3450089B9BB /* JoClean.app */,
+				B0B66F723089A3470089B9BB /* JoCleanTests.xctest */,
+				B0B66F7C3089A3470089B9BB /* JoCleanUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B0B66F623089A3450089B9BB /* JoClean */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0B66F843089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoClean" */;
+			buildPhases = (
+				B0B66F5F3089A3450089B9BB /* Sources */,
+				B0B66F603089A3450089B9BB /* Frameworks */,
+				B0B66F613089A3450089B9BB /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				B0B66F653089A3450089B9BB /* JoClean */,
+			);
+			name = JoClean;
+			productName = JoClean;
+			productReference = B0B66F633089A3450089B9BB /* JoClean.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B0B66F713089A3470089B9BB /* JoCleanTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0B66F873089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoCleanTests" */;
+			buildPhases = (
+				B0B66F6E3089A3470089B9BB /* Sources */,
+				B0B66F6F3089A3470089B9BB /* Frameworks */,
+				B0B66F703089A3470089B9BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B0B66F743089A3470089B9BB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B0B66F753089A3470089B9BB /* JoCleanTests */,
+			);
+			name = JoCleanTests;
+			productName = JoCleanTests;
+			productReference = B0B66F723089A3470089B9BB /* JoCleanTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B0B66F7B3089A3470089B9BB /* JoCleanUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0B66F8A3089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoCleanUITests" */;
+			buildPhases = (
+				B0B66F783089A3470089B9BB /* Sources */,
+				B0B66F793089A3470089B9BB /* Frameworks */,
+				B0B66F7A3089A3470089B9BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B0B66F7E3089A3470089B9BB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B0B66F7F3089A3470089B9BB /* JoCleanUITests */,
+			);
+			name = JoCleanUITests;
+			productName = JoCleanUITests;
+			productReference = B0B66F7C3089A3470089B9BB /* JoCleanUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B0B66F5B3089A3450089B9BB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2710;
+				LastUpgradeCheck = 2710;
+				TargetAttributes = {
+					B0B66F623089A3450089B9BB = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					B0B66F713089A3470089B9BB = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = B0B66F623089A3450089B9BB;
+					};
+					B0B66F7B3089A3470089B9BB = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = B0B66F623089A3450089B9BB;
+					};
+				};
+			};
+			buildConfigurationList = B0B66F5E3089A3450089B9BB /* Build configuration list for PBXProject "JoClean" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B0B66F5A3089A3450089B9BB;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B0B66F643089A3450089B9BB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B0B66F623089A3450089B9BB /* JoClean */,
+				B0B66F713089A3470089B9BB /* JoCleanTests */,
+				B0B66F7B3089A3470089B9BB /* JoCleanUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B0B66F613089A3450089B9BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		B0B66F703089A3470089B9BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		B0B66F7A3089A3470089B9BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B0B66F5F3089A3450089B9BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		B0B66F6E3089A3470089B9BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		B0B66F783089A3470089B9BB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B0B66F743089A3470089B9BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0B66F623089A3450089B9BB /* JoClean */;
+			targetProxy = B0B66F733089A3470089B9BB /* PBXContainerItemProxy */;
+		};
+		B0B66F7E3089A3470089B9BB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0B66F623089A3450089B9BB /* JoClean */;
+			targetProxy = B0B66F7D3089A3470089B9BB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B0B66F823089A3470089B9BB /* Debug configuration for PBXProject "JoClean" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B0B66F833089A3470089B9BB /* Release configuration for PBXProject "JoClean" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		B0B66F853089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoClean" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoClean;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B0B66F863089A3470089B9BB /* Release configuration for PBXNativeTarget "JoClean" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoClean;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B0B66F883089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoCleanTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoCleanTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JoClean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JoClean";
+			};
+			name = Debug;
+		};
+		B0B66F893089A3470089B9BB /* Release configuration for PBXNativeTarget "JoCleanTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoCleanTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JoClean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JoClean";
+			};
+			name = Release;
+		};
+		B0B66F8B3089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoCleanUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoCleanUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JoClean;
+			};
+			name = Debug;
+		};
+		B0B66F8C3089A3470089B9BB /* Release configuration for PBXNativeTarget "JoCleanUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AN9WCAJE2J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ichiosoft.JoClean.JoCleanUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JoClean;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B0B66F5E3089A3450089B9BB /* Build configuration list for PBXProject "JoClean" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0B66F823089A3470089B9BB /* Debug configuration for PBXProject "JoClean" */,
+				B0B66F833089A3470089B9BB /* Release configuration for PBXProject "JoClean" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0B66F843089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoClean" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0B66F853089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoClean" */,
+				B0B66F863089A3470089B9BB /* Release configuration for PBXNativeTarget "JoClean" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0B66F873089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoCleanTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0B66F883089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoCleanTests" */,
+				B0B66F893089A3470089B9BB /* Release configuration for PBXNativeTarget "JoCleanTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B0B66F8A3089A3470089B9BB /* Build configuration list for PBXNativeTarget "JoCleanUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0B66F8B3089A3470089B9BB /* Debug configuration for PBXNativeTarget "JoCleanUITests" */,
+				B0B66F8C3089A3470089B9BB /* Release configuration for PBXNativeTarget "JoCleanUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B0B66F5B3089A3450089B9BB /* Project object */;
+	validationLevel = 1;
+}
