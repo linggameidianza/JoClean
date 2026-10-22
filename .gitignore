@@ -1,0 +1,13 @@
+# Xcode user data & build output
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.xcresult
+
+# Exported app bundles and disk images (published as GitHub release assets instead)
+*.app/
+*.dmg
+
+# macOS
+.DS_Store

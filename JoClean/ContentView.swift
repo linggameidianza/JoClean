@@ -6,54 +6,118 @@
 //
 
 import SwiftUI
-import SwiftData
+
+enum SidebarItem: String, CaseIterable, Identifiable {
+    case smartScan, systemJunk, trash, largeFiles, uninstaller, optimization, malware
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .smartScan: "Smart Scan"
+        case .systemJunk: "System Junk"
+        case .trash: "Trash"
+        case .largeFiles: "Large & Old Files"
+        case .uninstaller: "Uninstaller"
+        case .optimization: "Optimization"
+        case .malware: "Malware Check"
+        }
+    }
+
+    var theme: ModuleTheme {
+        switch self {
+        case .smartScan: .smartScan
+        case .systemJunk: .systemJunk
+        case .trash: .trash
+        case .largeFiles: .largeFiles
+        case .uninstaller: .uninstaller
+        case .optimization: .optimization
+        case .malware: .malware
+        }
+    }
+}
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @State private var selection: SidebarItem? = .smartScan
+    /// Keep the sidebar (the module menu) visible; it used to auto-collapse at launch.
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
+
+    private var current: SidebarItem { selection ?? .smartScan }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            List(selection: $selection) {
+                sidebarRow(.smartScan)
+                Section("Cleanup") {
+                    sidebarRow(.systemJunk)
+                    sidebarRow(.trash)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                Section("Disk Space") {
+                    sidebarRow(.largeFiles)
+                }
+                Section("Applications") {
+                    sidebarRow(.uninstaller)
+                }
+                Section("Speed") {
+                    sidebarRow(.optimization)
+                }
+                Section("Security") {
+                    sidebarRow(.malware)
                 }
             }
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220)
         } detail: {
-            Text("Select an item")
-        }
-    }
+            ZStack {
+                // Each module has its own bright animated background; cross-fade when switching.
+                AnimatedMeshBackground(theme: current.theme)
+                    .id(current)
+                    .transition(.opacity)
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+                detail(for: current)
+                    .id(current)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .offset(y: 16)),
+                        removal: .opacity
+                    ))
             }
+            .animation(.smooth(duration: 0.5), value: current)
+            .environment(\.moduleTheme, current.theme)
+            // White text and light-on-dark controls read best on the saturated gradients.
+            .environment(\.colorScheme, .dark)
+            .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        }
+        .toolbar(removing: .title)
+        .frame(minWidth: 980, minHeight: 640)
+    }
+
+    private func sidebarRow(_ item: SidebarItem) -> some View {
+        Label {
+            Text(item.title)
+        } icon: {
+            Image(systemName: item.theme.symbol)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 22, height: 22)
+                .background(item.theme.gradient, in: .rect(cornerRadius: 6))
+        }
+        .tag(item)
+    }
+
+    @ViewBuilder
+    private func detail(for item: SidebarItem) -> some View {
+        switch item {
+        case .smartScan: SmartScanView()
+        case .systemJunk: SystemJunkView()
+        case .trash: TrashView()
+        case .largeFiles: LargeFilesView()
+        case .uninstaller: UninstallerView()
+        case .optimization: OptimizationView()
+        case .malware: MalwareCheckView()
         }
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .environment(AppState())
 }

@@ -1,0 +1,5 @@
+module CYara [system] {
+    header "yara.h"
+    link "yara"
+    export *
+}

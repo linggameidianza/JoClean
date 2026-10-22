@@ -6,27 +6,37 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct JoCleanApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    static let mainWindowID = "main"
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @State private var appState = AppState()
+
+    init() {
+        // AppKit restored a saved session in which the main window had been closed, so SwiftUI
+        // treated launch as "already restored" and never opened a window (only the menu bar icon
+        // appeared). Ignoring persisted window state guarantees a fresh main window on every launch.
+        UserDefaults.standard.register(defaults: ["ApplePersistenceIgnoreState": true])
+    }
 
     var body: some Scene {
-        WindowGroup {
+        // WindowGroup is the primary scene and is reliably presented at launch.
+        // (A single `Window` scene was sometimes never opened, leaving only the menu bar item.)
+        WindowGroup("JoClean", id: Self.mainWindowID) {
             ContentView()
+                .environment(appState)
         }
-        .modelContainer(sharedModelContainer)
+        .defaultSize(width: 1100, height: 760)
+        .defaultLaunchBehavior(.presented)
+        .restorationBehavior(.disabled)
+
+        MenuBarExtra {
+            MenuBarStatsView()
+                .environment(appState)
+        } label: {
+            Label("JoClean", systemImage: "sparkles")
+        }
+        .menuBarExtraStyle(.window)
     }
 }

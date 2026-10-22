@@ -7,37 +7,113 @@
 
 import XCTest
 
+/// Verifies that every module opens, shows a reachable scan button, and only scans after it is clicked.
 final class JoCleanUITests: XCTestCase {
 
+    private var app: XCUIApplication!
+    private var window: XCUIElement!
+
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        app = XCUIApplication()
+        app.launch()
+        app.activate()
+        window = app.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: 10), "Main window did not appear")
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        app.terminate()
     }
 
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+    // MARK: Helpers
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+    /// Selects a module in the sidebar.
+    private func openModule(_ title: String) {
+        let row = window.outlines.staticTexts[title].firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Sidebar item '\(title)' not found")
+        row.click()
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    /// Asserts the round scan button is on screen and clickable, then clicks it.
+    private func clickScanButton(_ title: String = "Scan") {
+        let button = window.buttons[title].firstMatch
+        XCTAssertTrue(button.waitForExistence(timeout: 5), "Button '\(title)' not found.\n\(window.debugDescription)")
+        XCTAssertTrue(button.isHittable, "Button '\(title)' is off-screen: window=\(window.frame) button=\(button.frame)")
+        button.click()
+    }
+
+    /// Waits for any of the given texts to appear (results differ between machines).
+    private func waitForAnyText(_ texts: [String], timeout: TimeInterval) -> Bool {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while Date.now < deadline {
+            for text in texts where window.staticTexts.containing(NSPredicate(format: "value CONTAINS %@", text)).firstMatch.exists {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.5)
         }
+        return false
+    }
+
+    // MARK: Tests
+
+    @MainActor
+    func testSmartScan() throws {
+        clickScanButton()
+        XCTAssertTrue(waitForAnyText(["Ready to clean"], timeout: 30), "Smart Scan never finished.\n\(window.debugDescription)")
+    }
+
+    @MainActor
+    func testSystemJunk() throws {
+        openModule("System Junk")
+        clickScanButton()
+        XCTAssertTrue(waitForAnyText(["of files you can clean"], timeout: 30), "System Junk scan never finished.\n\(window.debugDescription)")
+    }
+
+    @MainActor
+    func testTrash() throws {
+        openModule("Trash")
+        clickScanButton()
+        XCTAssertTrue(
+            waitForAnyText(["Trash Is Empty", "items using"], timeout: 20),
+            "Trash scan never finished.\n\(window.debugDescription)"
+        )
+    }
+
+    @MainActor
+    func testUninstaller() throws {
+        openModule("Uninstaller")
+        clickScanButton("View Apps")
+        XCTAssertTrue(waitForAnyText(["apps installed"], timeout: 60), "App list never loaded.\n\(window.debugDescription)")
+    }
+
+    @MainActor
+    func testOptimization() throws {
+        openModule("Optimization")
+        // Must not scan by itself: the welcome screen with its button has to be shown first.
+        clickScanButton()
+        XCTAssertTrue(waitForAnyText(["Running Apps"], timeout: 20), "Optimization scan never finished.\n\(window.debugDescription)")
+    }
+
+    /// The malware check works without any account: open it, press Scan, and get results
+    /// from XProtect, Gatekeeper and CIRCL.
+    @MainActor
+    func testMalwareCheckScansWithoutAPIKey() throws {
+        openModule("Malware Check")
+        XCTAssertTrue(window.staticTexts["XProtect"].waitForExistence(timeout: 5), "Engine list missing")
+        clickScanButton()
+        XCTAssertTrue(
+            waitForAnyText(["Done:"], timeout: 240),
+            "Malware scan never finished.\n\(window.debugDescription)"
+        )
+    }
+
+    /// Scanning the home folder can trigger privacy prompts, so only check the button is reachable.
+    @MainActor
+    func testLargeFilesButtonReachable() throws {
+        openModule("Large & Old Files")
+        let button = window.buttons["Scan"].firstMatch
+        XCTAssertTrue(button.waitForExistence(timeout: 5))
+        XCTAssertTrue(button.isHittable, "Scan button off-screen: window=\(window.frame) button=\(button.frame)")
     }
 }
