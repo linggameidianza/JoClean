@@ -61,7 +61,9 @@ struct UninstallerView: View {
                 Task { await model.uninstallSelectedApp() }
             }
         } message: {
-            Text("The app and the selected leftover files will be moved to the Trash.")
+            Text(model.requiresAdmin
+                 ? "The app and the selected leftover files will be moved to the Trash. macOS will ask for an administrator password because some items are system-wide."
+                 : "The app and the selected leftover files will be moved to the Trash.")
         }
         .alert(
             "Couldn’t Uninstall",
@@ -86,6 +88,14 @@ struct UninstallerView: View {
 
             if let result = model.lastResult {
                 RemovalResultBanner(result: result)
+            }
+            if let info = model.infoMessage {
+                Label(info, systemImage: "info.circle.fill")
+                    .font(.callout.weight(.medium))
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .glassPanel(cornerRadius: 14)
+                    .padding(.horizontal, 24)
             }
 
             HStack(spacing: 14) {
@@ -127,10 +137,12 @@ struct UninstallerView: View {
 
             ActionBar(
                 summary: model.selectedApp == nil ? "—" : model.totalUninstallSize.formattedBytes,
-                detail: model.selectedApp.map { "to remove from \($0.name)" } ?? "Select an app first",
+                detail: model.selectedApp.map { app in
+                    model.requiresAdmin ? "to remove from \(app.name) • requires administrator password" : "to remove from \(app.name)"
+                } ?? "Select an app first",
                 buttonTitle: "Uninstall",
                 isWorking: model.isUninstalling,
-                isDisabled: model.selectedApp == nil
+                isDisabled: model.selectedApp == nil || model.isRunningOfficialUninstaller
             ) {
                 isConfirmingUninstall = true
             }
@@ -164,13 +176,24 @@ struct UninstallerView: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.96)))
 
                 List {
+                    // Inside the List so long notices scroll instead of growing the panel's minimum height.
+                    if hasNotices {
+                        Section {
+                            notices(for: app)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                        }
+                    }
                     Section("Application") {
                         HStack {
-                            Image(systemName: "app.fill")
+                            FileIcon(url: app.url, size: 18)
                             Text(app.url.path(percentEncoded: false))
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                             Spacer()
+                            if model.analysis.appRequiresAdmin {
+                                Tag(text: "Admin", systemImage: "lock.fill")
+                            }
                             Text(app.size.formattedBytes)
                                 .monospacedDigit()
                                 .foregroundStyle(.white.opacity(0.8))
@@ -213,7 +236,76 @@ struct UninstallerView: View {
         }
     }
 
-    private func leftoverRow(_ item: CleanupItem) -> some View {
+    private var hasNotices: Bool {
+        model.isSelectedAppRunning || model.analysis.officialUninstaller != nil || model.analysis.hasSystemExtension
+    }
+
+    /// Running app, official uninstaller and system-extension hints for the selected app.
+    @ViewBuilder
+    private func notices(for app: InstalledApp) -> some View {
+        VStack(spacing: 8) {
+            if model.isSelectedAppRunning {
+                noticeCard(
+                    systemImage: "play.circle.fill",
+                    title: "\(app.name) is running",
+                    message: "Quit it before uninstalling."
+                ) {
+                    Button("Quit \(app.name)") { model.quitSelectedApp() }
+                        .buttonStyle(.glass)
+                }
+            }
+            if let uninstaller = model.analysis.officialUninstaller {
+                noticeCard(
+                    systemImage: "wand.and.stars",
+                    title: "Official uninstaller available",
+                    message: "Recommended for VPN, security, and driver software. It cleanly removes system extensions and background services."
+                ) {
+                    if model.isRunningOfficialUninstaller {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Button("Run Official Uninstaller") {
+                            Task { await model.runOfficialUninstaller() }
+                        }
+                        .buttonStyle(.glassProminent)
+                        .disabled(model.isUninstalling)
+                        .help(uninstaller.url.path(percentEncoded: false))
+                    }
+                }
+            } else if model.analysis.hasSystemExtension {
+                noticeCard(
+                    systemImage: "puzzlepiece.extension.fill",
+                    title: "Includes a system extension",
+                    message: "Restart your Mac after uninstalling to finish removing it."
+                ) { EmptyView() }
+            }
+        }
+    }
+
+    private func noticeCard<Accessory: View>(
+        systemImage: String,
+        title: String,
+        message: String,
+        @ViewBuilder accessory: () -> Accessory
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.title2)
+                .frame(width: 30)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .lineLimit(4)
+            }
+            Spacer()
+            accessory()
+        }
+        .padding(12)
+        .background(.white.opacity(0.12), in: .rect(cornerRadius: 12))
+    }
+
+    private func leftoverRow(_ item: LeftoverItem) -> some View {
         HStack {
             Toggle(isOn: Binding(
                 get: { model.leftoverSelection.contains(item.url) },
@@ -230,7 +322,7 @@ struct UninstallerView: View {
                     VStack(alignment: .leading) {
                         Text(item.name)
                             .lineLimit(1)
-                        Text(item.url.deletingLastPathComponent().path(percentEncoded: false))
+                        Text("\(item.kind.title) • \(item.url.deletingLastPathComponent().path(percentEncoded: false))")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.7))
                             .lineLimit(1)
@@ -239,10 +331,28 @@ struct UninstallerView: View {
                 }
             }
             Spacer()
+            if item.requiresAdmin {
+                Tag(text: "Admin", systemImage: "lock.fill")
+            }
             Text(item.size.formattedBytes)
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.8))
         }
         .contextMenu { FileContextMenu(url: item.url) }
+    }
+}
+
+/// Small capsule label, e.g. "Admin".
+private struct Tag: View {
+    let text: String
+    let systemImage: String
+
+    var body: some View {
+        Label(text, systemImage: systemImage)
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(.white.opacity(0.2), in: .capsule)
+            .help("Removing this requires an administrator password")
     }
 }

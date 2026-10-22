@@ -95,6 +95,34 @@ final class JoCleanUITests: XCTestCase {
         XCTAssertTrue(waitForAnyText(["Running Apps"], timeout: 20), "Optimization scan never finished.\n\(window.debugDescription)")
     }
 
+    /// Selecting a root-owned, system-wide app shows the admin requirement and its official uninstaller.
+    /// Read-only: nothing is uninstalled.
+    @MainActor
+    func testUninstallerShowsAdminAndOfficialUninstaller() throws {
+        try XCTSkipUnless(FileManager.default.fileExists(atPath: "/Applications/GlobalProtect.app"), "GlobalProtect not installed")
+        openModule("Uninstaller")
+        clickScanButton("View Apps")
+        XCTAssertTrue(waitForAnyText(["apps installed"], timeout: 60))
+
+        let search = window.textFields["Search apps"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.click()
+        search.typeText("GlobalProtect")
+        let row = window.staticTexts["GlobalProtect"].firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        row.click()
+
+        XCTAssertTrue(waitForAnyText(["Official uninstaller available"], timeout: 20), "Official uninstaller card missing.\n\(window.debugDescription)")
+        // Must be on screen, not just in the accessibility tree — an overflowing layout once pushed
+        // these off-screen while they still "existed".
+        XCTAssertTrue(window.buttons["Run Official Uninstaller"].isHittable, "Official uninstaller button is off-screen")
+        XCTAssertTrue(window.buttons["Uninstall"].firstMatch.isHittable, "Uninstall button is off-screen")
+        XCTAssertTrue(window.outlines.staticTexts["Smart Scan"].firstMatch.isHittable, "Sidebar was pushed off-screen")
+        XCTAssertTrue(waitForAnyText(["requires administrator password"], timeout: 5))
+        // The root-owned app row carries the "Admin" badge (leftover kinds are covered by unit tests).
+        XCTAssertTrue(window.staticTexts["Admin"].firstMatch.waitForExistence(timeout: 5), "Admin badge missing")
+    }
+
     /// The malware check works without any account: open it, press Scan, and get results
     /// from XProtect, Gatekeeper and CIRCL.
     @MainActor

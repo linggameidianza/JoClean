@@ -73,7 +73,13 @@ struct ContentView: View {
                     .id(current)
                     .transition(.opacity)
 
-                detail(for: current)
+                // Lay the module out in exactly the space available and clip any overflow, so no module
+                // can push the whole split view (including the sidebar) off-screen.
+                GeometryReader { proxy in
+                    detail(for: current)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                }
+                .clipped()
                     .id(current)
                     .transition(.asymmetric(
                         insertion: .opacity.combined(with: .offset(y: 16)),

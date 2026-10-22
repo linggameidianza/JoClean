@@ -233,3 +233,170 @@ struct NoSignupEngineTests {
         #expect(entry([circlUnknown]).verdict == .unknown)
     }
 }
+
+@Suite("Uninstaller with administrator support")
+struct UninstallerTests {
+
+    /// Builds a throwaway "Library" layout plus a fake app in a temporary folder.
+    private struct Sandbox {
+        let root: URL
+        let userLibrary: URL
+        let systemLibrary: URL
+        let trash: URL
+        let app: URL
+
+        init() throws {
+            root = FileManager.default.temporaryDirectory.appending(path: "joclean-uninstall-\(UUID().uuidString)")
+            userLibrary = root.appending(path: "home/Library")
+            systemLibrary = root.appending(path: "Library")
+            trash = root.appending(path: "home/.Trash")
+            // A space and an apostrophe in the path exercise the shell quoting.
+            app = root.appending(path: "Applications/Acme Tool's.app")
+            let fm = FileManager.default
+            for folder in UninstallPlanner.userFolders { try fm.createDirectory(at: userLibrary.appending(path: folder), withIntermediateDirectories: true) }
+            for folder in UninstallPlanner.systemFolders { try fm.createDirectory(at: systemLibrary.appending(path: folder), withIntermediateDirectories: true) }
+            try fm.createDirectory(at: app.appending(path: "Contents/MacOS"), withIntermediateDirectories: true)
+            try fm.createDirectory(at: app.appending(path: "Contents/Resources"), withIntermediateDirectories: true)
+            try Data("binary".utf8).write(to: app.appending(path: "Contents/MacOS/AcmeHelper"))
+        }
+
+        func write(_ text: String, to relative: String, in base: URL) throws {
+            let url = base.appending(path: relative)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try Data(text.utf8).write(to: url)
+        }
+
+        func launchPlist(program: String) -> String {
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <plist version="1.0"><dict>
+            <key>Label</key><string>com.acmecorp.agent</string>
+            <key>ProgramArguments</key><array><string>\(program)</string></array>
+            </dict></plist>
+            """
+        }
+    }
+
+    @Test func derivesMatchPrefixesFromBundleID() {
+        #expect(UninstallPlanner.matchPrefixes(bundleIdentifier: "com.paloaltonetworks.GlobalProtect.client", appName: "GlobalProtect")
+                == ["com.paloaltonetworks.globalprotect.client", "com.paloaltonetworks.globalprotect"])
+        // The parent prefix is only used when it ends with the app's name.
+        #expect(UninstallPlanner.matchPrefixes(bundleIdentifier: "com.microsoft.Word", appName: "Microsoft Word") == ["com.microsoft.word"])
+        #expect(UninstallPlanner.vendorToken(bundleIdentifier: "com.paloaltonetworks.GlobalProtect.client") == "paloaltonetworks")
+
+        let prefixes = UninstallPlanner.matchPrefixes(bundleIdentifier: "com.paloaltonetworks.GlobalProtect.client", appName: "GlobalProtect")
+        #expect(UninstallPlanner.nameMatches("com.paloaltonetworks.GlobalProtect.settings.plist", appName: "GlobalProtect", prefixes: prefixes))
+        #expect(!UninstallPlanner.nameMatches("com.paloaltonetworks.cortex.plist", appName: "GlobalProtect", prefixes: prefixes))
+    }
+
+    @Test func neverRemovesProtectedFolders() {
+        for path in ["/", "/Applications", "/Library", "/Library/LaunchDaemons", "/Library/Application Support",
+                     "/System/Library/CoreServices/Finder.app", "/Users"] {
+            #expect(!UninstallPlanner.isSafeToRemove(URL(filePath: path)), "\(path) must be protected")
+        }
+        #expect(!UninstallPlanner.isSafeToRemove(FileUtilities.library))
+        #expect(!UninstallPlanner.isSafeToRemove(FileUtilities.library.appending(path: "Preferences")))
+        #expect(UninstallPlanner.isSafeToRemove(URL(filePath: "/Applications/GlobalProtect.app")))
+        #expect(UninstallPlanner.isSafeToRemove(URL(filePath: "/Library/LaunchDaemons/com.paloaltonetworks.gp.pangpsd.plist")))
+    }
+
+    @Test func buildsSafelyQuotedRemovalScript() {
+        let daemon = LeftoverItem(url: URL(filePath: "/Library/LaunchDaemons/com.acme.d.plist"), size: 1, kind: .launchDaemon, requiresAdmin: true)
+        let agent = LeftoverItem(url: URL(filePath: "/Library/LaunchAgents/com.acme.a.plist"), size: 1, kind: .launchAgent, requiresAdmin: true)
+        let script = UninstallPlanner.removalScript(
+            items: [URL(filePath: "/Applications/Acme's Tool.app"), URL(filePath: "/Library"), daemon.url],
+            launchJobs: [daemon, agent],
+            packageIDs: ["com.acme.pkg"],
+            trashDirectory: URL(filePath: "/Users/test/.Trash"),
+            userID: 501
+        )
+        #expect(script.contains("launchctl bootout system '/Library/LaunchDaemons/com.acme.d.plist'"))
+        #expect(script.contains("launchctl bootout gui/501 '/Library/LaunchAgents/com.acme.a.plist'"))
+        #expect(script.contains("move_to_trash '/Applications/Acme'\\''s Tool.app'"))
+        #expect(!script.contains("move_to_trash '/Library'\n"), "protected folders must be skipped")
+        #expect(script.contains("pkgutil --forget 'com.acme.pkg'"))
+        #expect(PrivilegedShell.escapeAppleScript(#"say "hi" \ bye"#) == #"say \"hi\" \\ bye"#)
+    }
+
+    @Test func findsLeftoversAndOfficialUninstaller() throws {
+        let box = try Sandbox()
+        defer { try? FileManager.default.removeItem(at: box.root) }
+
+        try box.write("x", to: "Preferences/com.acmecorp.AcmeTools.settings.plist", in: box.systemLibrary)          // parent prefix ("Acme Tool's" → acmetools)
+        try box.write("x", to: "Application Support/AcmeCorp/Acme Tool's/data.db", in: box.systemLibrary)         // vendor folder
+        try box.write(box.launchPlist(program: box.app.appending(path: "Contents/MacOS/AcmeHelper").path(percentEncoded: false)),
+                      to: "LaunchDaemons/com.acmecorp.helperd.plist", in: box.systemLibrary)                       // runs inside the app
+        try box.write("x", to: "Caches/com.acmecorp.AcmeTools.client/cache.bin", in: box.userLibrary)              // bundle ID
+        try box.write("x", to: "Preferences/com.other.unrelated.plist", in: box.userLibrary)                      // must be ignored
+        try box.write("#!/bin/sh\nexit 0\n", to: "Contents/Resources/uninstall_acme.sh", in: box.app)
+
+        let analysis = UninstallPlanner.analyze(
+            appURL: box.app,
+            appName: "Acme Tool's",
+            bundleIdentifier: "com.acmecorp.AcmeTools.client",
+            userLibrary: box.userLibrary,
+            systemLibrary: box.systemLibrary
+        )
+        let names = Set(analysis.leftovers.map(\.name))
+        #expect(names.isSuperset(of: ["com.acmecorp.AcmeTools.settings.plist", "Acme Tool's", "com.acmecorp.helperd.plist", "com.acmecorp.AcmeTools.client"]))
+        #expect(!names.contains("com.other.unrelated.plist"))
+        #expect(analysis.leftovers.first { $0.name == "com.acmecorp.helperd.plist" }?.kind == .launchDaemon)
+        #expect(analysis.officialUninstaller?.url.lastPathComponent == "uninstall_acme.sh")
+        #expect(analysis.officialUninstaller?.kind == .script)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func removalScriptMovesEverythingToTrash() async throws {
+        let box = try Sandbox()
+        defer { try? FileManager.default.removeItem(at: box.root) }
+        try box.write("x", to: "Preferences/com.acmecorp.AcmeTool.client.plist", in: box.userLibrary)
+        try box.write(box.launchPlist(program: "/usr/bin/true"), to: "LaunchAgents/com.acmecorp.agent.plist", in: box.userLibrary)
+        try FileManager.default.createDirectory(at: box.trash, withIntermediateDirectories: true)
+        // A same-named item already in the Trash must not be overwritten.
+        try box.write("old", to: "com.acmecorp.AcmeTool.client.plist", in: box.trash)
+
+        let preference = box.userLibrary.appending(path: "Preferences/com.acmecorp.AcmeTool.client.plist")
+        let agent = LeftoverItem(url: box.userLibrary.appending(path: "LaunchAgents/com.acmecorp.agent.plist"), size: 0, kind: .launchAgent, requiresAdmin: false)
+        let script = UninstallPlanner.removalScript(
+            items: [box.app, preference, agent.url],
+            launchJobs: [agent],
+            packageIDs: [],
+            trashDirectory: box.trash,
+            userID: getuid()
+        )
+        // Same script the app runs as administrator — here without elevation, on user-owned files.
+        let output = try await PrivilegedShell.run(script: script, asAdministrator: false, prompt: "")
+        let parsed = UninstallPlanner.parseRemovalOutput(output)
+
+        #expect(parsed.failed.isEmpty, "failures: \(parsed.failed)")
+        #expect(parsed.removed.count == 3)
+        let fm = FileManager.default
+        #expect(!fm.fileExists(atPath: box.app.path(percentEncoded: false)))
+        #expect(!fm.fileExists(atPath: preference.path(percentEncoded: false)))
+        #expect(fm.fileExists(atPath: box.trash.appending(path: "Acme Tool's.app/Contents/MacOS/AcmeHelper").path(percentEncoded: false)))
+        #expect(fm.fileExists(atPath: box.trash.appending(path: "com.acmecorp.AcmeTool.client.plist 2").path(percentEncoded: false)))
+        #expect(try String(contentsOf: box.trash.appending(path: "com.acmecorp.AcmeTool.client.plist"), encoding: .utf8) == "old")
+    }
+
+    /// Read-only: checks what JoClean would remove for the real GlobalProtect install (nothing is deleted).
+    @Test(.enabled(if: FileManager.default.fileExists(atPath: "/Applications/GlobalProtect.app")))
+    func analyzesInstalledGlobalProtect() {
+        let analysis = UninstallPlanner.analyze(
+            appURL: URL(filePath: "/Applications/GlobalProtect.app"),
+            appName: "GlobalProtect",
+            bundleIdentifier: "com.paloaltonetworks.GlobalProtect.client"
+        )
+        let paths = Set(analysis.leftovers.map { $0.url.path(percentEncoded: false) })
+        #expect(paths.contains("/Library/LaunchDaemons/com.paloaltonetworks.gp.pangpsd.plist"))
+        #expect(paths.contains("/Library/LaunchAgents/com.paloaltonetworks.gp.pangps.plist"))
+        #expect(paths.contains("/Library/LaunchAgents/com.paloaltonetworks.gp.pangpa.plist"))
+        #expect(paths.contains("/Library/Preferences/com.paloaltonetworks.GlobalProtect.settings.plist"))
+        #expect(analysis.appRequiresAdmin)
+        let launchJobs = analysis.leftovers.filter { $0.url.path(percentEncoded: false).hasPrefix("/Library/Launch") }
+        let allNeedAdmin = launchJobs.allSatisfy { $0.requiresAdmin }
+        #expect(allNeedAdmin)
+        #expect(analysis.hasSystemExtension)
+        #expect(analysis.officialUninstaller?.url.lastPathComponent == "uninstall_gp.sh")
+        #expect(analysis.packageIDs == ["com.paloaltonetworks.globalprotect.pkg"])
+    }
+}

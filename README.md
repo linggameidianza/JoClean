@@ -24,7 +24,7 @@
 | **System Junk** | Finds user caches, logs, Xcode DerivedData, iOS DeviceSupport, Simulator caches, and old installers (`.dmg`, `.pkg`, `.xip`). |
 | **Trash** | Shows what's in your Trash and empties it permanently. |
 | **Large & Old Files** | Sortable table of big or long-untouched files with size and age filters. |
-| **Uninstaller** | Removes apps together with their leftovers in `~/Library` (Application Support, Caches, Preferences, Containers, and more). |
+| **Uninstaller** | Removes apps together with their leftovers in `~/Library` and `/Library` — including launch agents/daemons and installer receipts. Root-owned apps are removed via the standard macOS administrator prompt, and vendor-provided uninstallers (e.g. for VPN or security software) can be run with one click. |
 | **Optimization** | Lists running apps by memory footprint (Quit / Force Quit) and manages user Launch Agents. |
 | **Malware Check** | Combines several detection engines — no account or API key required (see below). |
 | **Menu bar** | Quick Disk / Memory / CPU stats from the menu bar. |
@@ -45,6 +45,7 @@ File contents are never uploaded anywhere.
 - Nothing is scanned until you click **Scan**.
 - Everything you clean is **moved to the Trash** (except "Empty Trash"), so it can be recovered.
 - Every destructive action asks for confirmation.
+- Administrator rights are requested only when needed, through macOS's own password dialog — JoClean never sees your password. System folders such as `/Library` or `/Applications` themselves can never be removed.
 
 ## Installation
 
