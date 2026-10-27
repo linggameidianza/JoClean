@@ -22,7 +22,7 @@
 |---|---|
 | **Smart Scan** | Live Disk, Memory, and CPU dashboard plus a one-click scan of system junk and the Trash. |
 | **System Junk** | Finds user caches, logs, Xcode DerivedData, iOS DeviceSupport, Simulator caches, and old installers (`.dmg`, `.pkg`, `.xip`). |
-| **Trash** | Shows what's in your Trash and empties it permanently. |
+| **Trash** | Shows what's in your Trash and empties it permanently — directly with Full Disk Access, or through Finder (Automation permission) without it. |
 | **Large & Old Files** | Sortable table of big or long-untouched files with size and age filters. |
 | **Uninstaller** | Removes apps together with their leftovers in `~/Library` and `/Library` — including launch agents/daemons and installer receipts. Root-owned apps are removed via the standard macOS administrator prompt, and vendor-provided uninstallers (e.g. for VPN or security software) can be run with one click. |
 | **Optimization** | Lists running apps by memory footprint (Quit / Force Quit) and manages user Launch Agents. |
@@ -55,6 +55,7 @@ File contents are never uploaded anywhere.
    - **System Settings → Privacy & Security** → scroll down → **Open Anyway**, or
    - in Terminal: `xattr -dr com.apple.quarantine /Applications/JoClean.app`
 4. *(Recommended)* Grant **Full Disk Access** in **System Settings → Privacy & Security → Full Disk Access** so JoClean can read the Trash and every Library folder.
+5. When you first scan the Trash without Full Disk Access, macOS asks whether JoClean may **control Finder**. Click **OK** so JoClean can show and empty the Trash through Finder.
 
 ## Building from source
 

@@ -400,3 +400,27 @@ struct UninstallerTests {
         #expect(analysis.packageIDs == ["com.paloaltonetworks.globalprotect.pkg"])
     }
 }
+
+@Suite("Trash via Finder")
+struct FinderTrashTests {
+    @Test func parsesFinderListing() throws {
+        let output = "4\nReport.pdf\t20480\nOld Project\t-1\nmovie.mov\t1.234567891E+9\nwith\ttab.txt\t512\n"
+        let listing = try FinderTrash.parseListing(output)
+        #expect(listing.totalCount == 4)
+        #expect(listing.entries.count == 4)
+        #expect(listing.entries[0] == .init(name: "Report.pdf", size: 20_480))
+        #expect(listing.entries[1] == .init(name: "Old Project", size: nil))       // folder size not calculated
+        #expect(listing.entries[2].size == 1_234_567_891)                          // AppleScript real notation
+        #expect(listing.entries[3] == .init(name: "with\ttab.txt", size: 512))     // name containing a tab
+    }
+
+    @Test func acceptsDecimalCommaLocales() throws {
+        let listing = try FinderTrash.parseListing("1\nbackup.zip\t2,5E+9\n")
+        #expect(listing.entries.first?.size == 2_500_000_000)
+    }
+
+    @Test func handlesEmptyTrashAndBadOutput() throws {
+        #expect(try FinderTrash.parseListing("0\n") == .init(totalCount: 0, entries: []))
+        #expect(throws: FinderTrash.FinderError.self) { try FinderTrash.parseListing("execution error") }
+    }
+}

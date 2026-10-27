@@ -16,6 +16,8 @@ final class JoCleanUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
+        // Tests can't answer the "control Finder" Automation prompt, so keep the Finder fallback off.
+        app.launchArguments += ["-JoCleanDisableFinderTrash"]
         app.launch()
         app.activate()
         window = app.windows.firstMatch
@@ -75,7 +77,7 @@ final class JoCleanUITests: XCTestCase {
         openModule("Trash")
         clickScanButton()
         XCTAssertTrue(
-            waitForAnyText(["Trash Is Empty", "items using"], timeout: 20),
+            waitForAnyText(["Trash Is Empty", "items using", "See Your Trash"], timeout: 20),
             "Trash scan never finished.\n\(window.debugDescription)"
         )
     }
@@ -93,6 +95,20 @@ final class JoCleanUITests: XCTestCase {
         // Must not scan by itself: the welcome screen with its button has to be shown first.
         clickScanButton()
         XCTAssertTrue(waitForAnyText(["Running Apps"], timeout: 20), "Optimization scan never finished.\n\(window.debugDescription)")
+    }
+
+    /// Without access to ~/.Trash the module must explain how to fix it — never claim the Trash is empty.
+    @MainActor
+    func testTrashExplainsMissingPermission() throws {
+        openModule("Trash")
+        clickScanButton()
+        XCTAssertTrue(waitForAnyText(["See Your Trash", "items using", "Trash Is Empty"], timeout: 20))
+        if window.staticTexts.containing(NSPredicate(format: "value CONTAINS %@", "See Your Trash")).firstMatch.exists {
+            XCTAssertTrue(window.buttons["Open Automation"].isHittable)
+            XCTAssertTrue(window.buttons["Open Full Disk Access"].isHittable)
+            XCTAssertTrue(window.buttons["Try Again"].firstMatch.isHittable)
+            XCTAssertFalse(window.staticTexts["Trash Is Empty"].exists, "Must not claim the Trash is empty when it can't be read")
+        }
     }
 
     /// Selecting a root-owned, system-wide app shows the admin requirement and its official uninstaller.
