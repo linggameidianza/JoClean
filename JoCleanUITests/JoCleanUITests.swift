@@ -111,6 +111,38 @@ final class JoCleanUITests: XCTestCase {
         }
     }
 
+    /// The Uninstall confirmation offers both "Move to Trash" and "Delete Permanently".
+    /// Only Cancel is clicked — nothing is uninstalled.
+    @MainActor
+    func testUninstallConfirmationOffersTrashOrPermanent() throws {
+        openModule("Uninstaller")
+        clickScanButton("View Apps")
+        XCTAssertTrue(waitForAnyText(["apps installed"], timeout: 60))
+
+        // Select the first app in the list.
+        let firstApp = window.tables.firstMatch.cells.firstMatch.exists
+            ? window.tables.firstMatch.cells.firstMatch
+            : window.outlines.element(boundBy: 1).cells.firstMatch
+        XCTAssertTrue(firstApp.waitForExistence(timeout: 10), "App list is empty")
+        firstApp.click()
+        XCTAssertTrue(waitForAnyText(["to remove from"], timeout: 15), "No app selected")
+
+        clickScanButton("Uninstall")
+        let moveToTrash = app.buttons["Move to Trash"].firstMatch
+        let deletePermanently = app.buttons["Delete Permanently"].firstMatch
+        let cancel = app.buttons["Cancel"].firstMatch
+        XCTAssertTrue(moveToTrash.waitForExistence(timeout: 5), "Move to Trash option missing.\n\(app.debugDescription)")
+        XCTAssertTrue(deletePermanently.exists, "Delete Permanently option missing")
+        XCTAssertTrue(cancel.exists, "Cancel option missing")
+
+        // Escape = Cancel ("Cancel" also matches a non-clickable Touch Bar button).
+        app.typeKey(.escape, modifierFlags: [])
+        let dismissed = NSPredicate(format: "exists == false")
+        let expectation = XCTNSPredicateExpectation(predicate: dismissed, object: moveToTrash)
+        XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 5), .completed, "Dialog should be dismissed")
+        XCTAssertTrue(waitForAnyText(["to remove from"], timeout: 5), "App should still be selected after Cancel")
+    }
+
     /// Selecting a root-owned, system-wide app shows the admin requirement and its official uninstaller.
     /// Read-only: nothing is uninstalled.
     @MainActor

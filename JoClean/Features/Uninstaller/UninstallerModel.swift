@@ -32,6 +32,8 @@ final class UninstallerModel {
     private(set) var isUninstalling = false
     private(set) var isRunningOfficialUninstaller = false
     var lastResult: RemovalResult?
+    /// Whether `lastResult` came from a permanent deletion (vs. moving to the Trash).
+    private(set) var lastRemovalWasPermanent = false
     var errorMessage: String?
     var infoMessage: String?
 
@@ -80,7 +82,9 @@ final class UninstallerModel {
         NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).forEach { $0.terminate() }
     }
 
-    func uninstallSelectedApp() async {
+    /// Uninstalls the selected app and its selected leftovers — moved to the Trash (default,
+    /// recoverable) or deleted permanently.
+    func uninstallSelectedApp(permanently: Bool = false) async {
         guard let app = selectedApp, !isUninstalling else { return }
         if isSelectedAppRunning {
             errorMessage = "\(app.name) is running. Quit the app first."
@@ -101,13 +105,16 @@ final class UninstallerModel {
                 launchJobs: launchJobs,
                 packageIDs: requiresAdmin ? analysis.packageIDs : [],
                 trashDirectory: FileUtilities.home.appending(path: ".Trash", directoryHint: .isDirectory),
-                userID: getuid()
+                userID: getuid(),
+                permanently: permanently
             )
             do {
                 let output = try await PrivilegedShell.run(
                     script: script,
                     asAdministrator: requiresAdmin,
-                    prompt: "JoClean wants to uninstall \(app.name) and its system components."
+                    prompt: permanently
+                        ? "JoClean wants to permanently delete \(app.name) and its system components."
+                        : "JoClean wants to uninstall \(app.name) and its system components."
                 )
                 let parsed = UninstallPlanner.parseRemovalOutput(output)
                 let sizes = Dictionary(uniqueKeysWithValues: ([CleanupItem(url: app.url, size: app.size)]
@@ -125,10 +132,11 @@ final class UninstallerModel {
             }
         } else {
             let targets = [CleanupItem(url: app.url, size: app.size)] + leftovers.map { CleanupItem(url: $0.url, size: $0.size) }
-            result = await FileUtilities.removeInBackground(targets, permanently: false)
+            result = await FileUtilities.removeInBackground(targets, permanently: permanently)
         }
 
         lastResult = result
+        lastRemovalWasPermanent = permanently
         if FileManager.default.fileExists(atPath: app.url.path(percentEncoded: false)) {
             errorMessage = "\(app.name) couldn’t be removed. If macOS blocked it, allow JoClean in System Settings → Privacy & Security → App Management, or use the app’s official uninstaller."
         } else {

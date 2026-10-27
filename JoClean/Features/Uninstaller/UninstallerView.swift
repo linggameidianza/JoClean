@@ -57,13 +57,16 @@ struct UninstallerView: View {
             "Uninstall \(model.selectedApp?.name ?? "app") (\(model.totalUninstallSize.formattedBytes))?",
             isPresented: $isConfirmingUninstall
         ) {
-            Button("Uninstall App", role: .destructive) {
-                Task { await model.uninstallSelectedApp() }
+            // Default, recoverable choice first.
+            Button("Move to Trash") {
+                Task { await model.uninstallSelectedApp(permanently: false) }
             }
+            Button("Delete Permanently", role: .destructive) {
+                Task { await model.uninstallSelectedApp(permanently: true) }
+            }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text(model.requiresAdmin
-                 ? "The app and the selected leftover files will be moved to the Trash. macOS will ask for an administrator password because some items are system-wide."
-                 : "The app and the selected leftover files will be moved to the Trash.")
+            Text(confirmationMessage)
         }
         .alert(
             "Couldn’t Uninstall",
@@ -78,6 +81,14 @@ struct UninstallerView: View {
         }
     }
 
+    private var confirmationMessage: String {
+        var text = "Move to Trash keeps everything recoverable until you empty the Trash. Delete Permanently frees the space right away and can’t be undone."
+        if model.requiresAdmin {
+            text += " macOS will ask for an administrator password because some items are system-wide."
+        }
+        return text
+    }
+
     private var results: some View {
         @Bindable var bindable = model
         return VStack(spacing: 12) {
@@ -87,7 +98,7 @@ struct UninstallerView: View {
             )
 
             if let result = model.lastResult {
-                RemovalResultBanner(result: result)
+                RemovalResultBanner(result: result, movedToTrash: !model.lastRemovalWasPermanent)
             }
             if let info = model.infoMessage {
                 Label(info, systemImage: "info.circle.fill")

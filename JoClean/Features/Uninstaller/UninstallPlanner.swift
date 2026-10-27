@@ -263,15 +263,16 @@ nonisolated enum UninstallPlanner {
 
     // MARK: Removal script
 
-    /// Shell script that stops the app's launchd jobs, moves everything to the user's Trash
-    /// (re-owned by the user so it can be restored or emptied normally) and forgets receipts.
-    /// Prints `REMOVED:<path>` / `FAILED:<path>` per item.
+    /// Shell script that stops the app's launchd jobs, then either moves everything to the user's
+    /// Trash (re-owned by the user so it can be restored or emptied normally) or deletes it
+    /// permanently, and forgets installer receipts. Prints `REMOVED:<path>` / `FAILED:<path>` per item.
     static func removalScript(
         items: [URL],
         launchJobs: [LeftoverItem],
         packageIDs: [String],
         trashDirectory: URL,
-        userID: UInt32
+        userID: UInt32,
+        permanently: Bool = false
     ) -> String {
         let q = PrivilegedShell.quote
         var lines = [
@@ -287,6 +288,13 @@ nonisolated enum UninstallPlanner {
             "  n=2",
             "  while [ -e \"$dest\" ] || [ -L \"$dest\" ]; do dest=\"$TRASH/$base $n\"; n=$((n+1)); done",
             "  if mv \"$src\" \"$dest\"; then chown -R \"$OWNER\" \"$dest\" 2>/dev/null; echo \"REMOVED:$src\"; else echo \"FAILED:$src\"; fi",
+            "}",
+            "delete_permanently() {",
+            "  src=\"$1\"",
+            "  if [ ! -e \"$src\" ] && [ ! -L \"$src\" ]; then echo \"REMOVED:$src\"; return 0; fi",
+            // Clear immutable flags first, otherwise rm fails on locked files.
+            "  chflags -R nouchg,noschg \"$src\" 2>/dev/null",
+            "  if rm -rf -- \"$src\" && [ ! -e \"$src\" ] && [ ! -L \"$src\" ]; then echo \"REMOVED:$src\"; else echo \"FAILED:$src\"; fi",
             "}"
         ]
         // Stop background jobs first so their files aren't in use.
@@ -296,8 +304,9 @@ nonisolated enum UninstallPlanner {
         }
         if !launchJobs.isEmpty { lines.append("sleep 1") }
 
+        let action = permanently ? "delete_permanently" : "move_to_trash"
         for item in items where isSafeToRemove(item) {
-            lines.append("move_to_trash \(q(item.path(percentEncoded: false)))")
+            lines.append("\(action) \(q(item.path(percentEncoded: false)))")
         }
         for id in packageIDs {
             lines.append("pkgutil --forget \(q(id)) >/dev/null 2>&1")

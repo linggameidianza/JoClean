@@ -378,6 +378,58 @@ struct UninstallerTests {
         #expect(try String(contentsOf: box.trash.appending(path: "com.acmecorp.AcmeTool.client.plist"), encoding: .utf8) == "old")
     }
 
+    @Test func buildsPermanentDeletionScript() {
+        let script = UninstallPlanner.removalScript(
+            items: [URL(filePath: "/Applications/Acme's Tool.app"), URL(filePath: "/Library/LaunchDaemons")],
+            launchJobs: [],
+            packageIDs: [],
+            trashDirectory: URL(filePath: "/Users/test/.Trash"),
+            userID: 501,
+            permanently: true
+        )
+        #expect(script.contains("delete_permanently '/Applications/Acme'\\''s Tool.app'"))
+        #expect(!script.contains("\nmove_to_trash '"), "permanent mode must not move items to the Trash")
+        #expect(!script.contains("delete_permanently '/Library/LaunchDaemons'"), "protected folders must be skipped")
+        #expect(script.contains("rm -rf -- \"$src\""))
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func permanentScriptDeletesEverythingIncludingLockedFiles() async throws {
+        let box = try Sandbox()
+        defer {
+            // Unlock anything a failed run may have left behind so cleanup can't fail.
+            _ = try? Process.run(URL(filePath: "/usr/bin/chflags"), arguments: ["-R", "nouchg", box.root.path(percentEncoded: false)]).waitUntilExit()
+            try? FileManager.default.removeItem(at: box.root)
+        }
+        try box.write("x", to: "Preferences/com.acmecorp.AcmeTools.client.plist", in: box.userLibrary)
+        try FileManager.default.createDirectory(at: box.trash, withIntermediateDirectories: true)
+
+        // A locked (immutable) file inside the app — plain rm would fail on it.
+        let locked = box.app.appending(path: "Contents/Resources/locked.dat")
+        try Data("locked".utf8).write(to: locked)
+        try FileManager.default.setAttributes([.immutable: true], ofItemAtPath: locked.path(percentEncoded: false))
+
+        let preference = box.userLibrary.appending(path: "Preferences/com.acmecorp.AcmeTools.client.plist")
+        let script = UninstallPlanner.removalScript(
+            items: [box.app, preference],
+            launchJobs: [],
+            packageIDs: [],
+            trashDirectory: box.trash,
+            userID: getuid(),
+            permanently: true
+        )
+        let output = try await PrivilegedShell.run(script: script, asAdministrator: false, prompt: "")
+        let parsed = UninstallPlanner.parseRemovalOutput(output)
+
+        #expect(parsed.failed.isEmpty, "failures: \(parsed.failed)\n\(output)")
+        #expect(parsed.removed.count == 2)
+        let fm = FileManager.default
+        #expect(!fm.fileExists(atPath: box.app.path(percentEncoded: false)))
+        #expect(!fm.fileExists(atPath: preference.path(percentEncoded: false)))
+        // Nothing ends up in the Trash when deleting permanently.
+        #expect(try fm.contentsOfDirectory(atPath: box.trash.path(percentEncoded: false)).isEmpty)
+    }
+
     /// Read-only: checks what JoClean would remove for the real GlobalProtect install (nothing is deleted).
     @Test(.enabled(if: FileManager.default.fileExists(atPath: "/Applications/GlobalProtect.app")))
     func analyzesInstalledGlobalProtect() {
