@@ -14,6 +14,14 @@
   <img alt="Architecture" src="https://img.shields.io/badge/Apple%20Silicon%20%2B%20Intel-universal-lightgrey">
 </p>
 
+<p align="center">
+  <a href="https://github.com/linggameidianza/JoClean/releases/latest"><b>⬇️ Download the latest release</b></a>
+</p>
+
+<p align="center">
+  <img src="docs/infographic.png" width="800" alt="JoClean features infographic: Smart Scan, System Junk, Trash, Large &amp; Old Files, Uninstaller, Optimization, Malware Check, and Menu Bar">
+</p>
+
 ---
 
 ## Features
@@ -85,6 +93,7 @@ JoClean/
 ThirdParty/yara/   libyara (BSD-3-Clause) headers, static library, and build script
 JoCleanTests/      Unit tests (Swift Testing)
 JoCleanUITests/    UI tests (XCUIAutomation)
+docs/              Infographic (infographic.png) and the SwiftUI script that renders it
 ```
 
 ## Notes
